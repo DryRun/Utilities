@@ -30,7 +30,7 @@ class RunInfoDBWrapper:
 		self.templ = templ
 
 		#	Set up DB things
-		self.lNames = {"NEVENTS" : "CMS.HCAL%:EventsRequested", 
+		self.lNames = {"NEVENTS" : "CMS.HCAL%:TRIGGERS", 
 				"CONFIGURATION" : "CMS.HCAL%:FM_FULLPATH"}
 		self.lSels = ["STRING_VALUE", "TIME"]
 		self.lInfo = {}

@@ -2,7 +2,7 @@
 
 #
 #	Processing Script
-#	Processes Local HCALDQM 
+#	Processes Local HCALDQM Runs
 #
 
 #	predefine paths/variables
