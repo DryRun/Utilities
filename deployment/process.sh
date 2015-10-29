@@ -6,7 +6,7 @@
 #
 
 #	predefine paths/variables
-DATAPOOL=/hcaldepot1/data/
+DATAPOOL=/hcaldepot1/data
 FILENAMEBASE=USC_
 LOGFILEBASE=/tmp/process.log
 CMSSWDIR=/nfshome0/hcaldqm/HCALDQM/CMSSW
@@ -15,35 +15,46 @@ CMSSWSRC=$CMSSWDIR/$CMSSWVERSION/src
 WORKDIR=/nfshome0/hcaldqm/HCALDQM/scripts
 STATUSDIR="$WORKDIR/status"
 DQMOUTPUT=$WORKDIR/output
-MINRUNNUMBER=250000
+MINRUNNUMBER=260000
 SIZETHRESHOLD=600000000
+DESTPOOL=/hcaldepot1/DetDiag/LOCAL_HTML/
 LONGSHORT=$1
 DEBUG=$2
+
+if [[ $DEBUG == 1 ]]; then
+	echo "Pool: $DATAPOOL"
+	echo "LongShort: $LONGSHORT"
+fi
 
 #
 #	Determine if there is a lock set.
 #	2 lock types for 2 processing types short/long
 #	if there is a lock of your type - exit
 #
-$LOCKFILE=$WORKDIR/process.lockshort
-if [[ $LONGSHORT=="LONG" ]]; then
-	LOCKFILE=$WORKDIR/process.locklong
+LOCKFILE="$WORKDIR/process.lockshort"
+if [[ $LONGSHORT == "LONG" ]]; then
+	LOCKFILE="$WORKDIR/process.locklong"
 fi
-if [[ -e $LOCKFILE ]]
+if [[ -e $LOCKFILE ]]; then
 	exit 0
 else
 	touch $LOCKFILE
+fi
+
+if [[ $DEBUG == 1 ]]; then
+	echo $LOCKFILE
 fi
 
 #	Initialize env vars
 cd $CMSSWSRC
 source /opt/offline/cmsset_default.sh
 export SCRAM_ACRCH=slc6_amd64_gcc491
-eval `cmsenv`
-eval `scram b -j 8`
+cmsenv
+scram b -j 8
 cd $WORKDIR
 
 #	List all files that are available in the pool
+echo "Startign the Loop"
 for FILE in $DATAPOOL/USC_*.root; do
 
 	#	get the run number
@@ -54,6 +65,17 @@ for FILE in $DATAPOOL/USC_*.root; do
 	RUNNUMBER="${FILE:$POS:$LENGTH}"
 	LOGFILE="$LOGFILEBASE.$RUNNUMBER"
 	FILESIZE=`ls -l $FILE | awk '{print $5}'`
+
+	if [[ $DEBUG == 1 ]]; then
+		echo "Filename: $FILE"
+		echo "LengthBase:  $LENGTHBASE"
+		echo "LengthFilenameBase: $LENGTHFILENAMEBASE"
+		echo $POS
+		echo "Length: $LENGTH"
+		echo "RunNumber: $RUNNUMBER"
+		echo "LogFile: $LOGFILE"
+		echo "FileSize: $FILESIZE"
+	fi
 
 	#	Decide if we want to process this run or not, based on
 	#	1. FILESIZE
@@ -69,32 +91,32 @@ for FILE in $DATAPOOL/USC_*.root; do
 	fi
 	
 	#	do the cmsRun if this file isn't present
-	if [[ -e $STATUSDIR/status/processing/$RUNNUMBER ]]; then
+	if [[ -e $STATUSDIR/processing/$RUNNUMBER ]]; then
 		continue
 	fi
-	if [[ ! -e $STATUSDIR/status/processed/$RUNNUMBER ]]; then
+	if [[ ! -e $STATUSDIR/processed/$RUNNUMBER ]]; then
 		echo "Processing FileName: $FILE" > $LOGFILE
-		touch $STATUSDIR/status/processing/$RUNNUMBER
-		if [[ $DEBUG==1 ]]; then
-			echo "DEBUG: cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=$FILE"
+		if [[ $DEBUG == 1 ]]; then
+			echo "DEBUG: cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=file:$FILE"
+			touch $STATUSDIR/processing/$RUNNUMBER
 		else
-
-			if cmsRun $CMSSWDQM/new_hcal_dqm_Local.py inputFiles=$FILE	\
+			touch $STATUSDIR/processing/$RUNNUMBER
+			if cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=file:$FILE	\
 				> $LOGFILE 2>&1; then
-				touch $STATUSDIR/status/processed/$RUNNUMBER
+				touch $STATUSDIR/processed/$RUNNUMBER
+				mkdir $DQMOUTPUT/DQM_V0001_Hcal_R000${RUNNUMBER}_0
+				mv $WORKDIR/DQM_V0001_Hcal_R000${RUNNUMBER}.root $DQMOUTPUT/DQM_V0001_Hcal_R000${RUNNUMBER}_0
+				cp -r $DQMOUTPUT/DQM_V0001_Hcal_R000${RUNNUMBER}_0 $DESTPOOL 
 			else
-				touch $STATUSDIR/status/failed/$RUNNUMBER
-				rm $STATUSDIR/status/processing/$RUNNUMBER
+				touch $STATUSDIR/failed/$RUNNUMBER
+				rm $STATUSDIR/processing/$RUNNUMBER
 			fi
 		fi
 	fi
 done
 
-#	Release the lock!
-rm $LOCKFILE
-
 #	set up the trap
-trap "rm $LOCKFILE; exit" INT TERM EXIT
+trap "rm $LOCKFILE; exit" SIGINT INT TERM EXIT
 
 
 
