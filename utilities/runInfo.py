@@ -1,8 +1,13 @@
 #!/usr/bin/python
 
 """
-file:				RunInfoDBWrapper.py
+file:				runInfo.py
 Author:				Viktor Khristenko
+
+description:
+	Run Info DB related gymnastics.
+	- generating xml file from db query
+	- loading an xml file in
 """
 
 #
@@ -83,7 +88,7 @@ class RunInfoDBWrapper:
 
 #
 #	upon exec
-#	a file <runnumber>.info will be generated in the folder specficed as 
+#	a file <runnumber>.xml will be generated in the folder specficed as 
 #	<pathToSave>
 #
 if __name__=="__main__":

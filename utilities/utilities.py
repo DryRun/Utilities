@@ -27,6 +27,11 @@ def do(cmd):
 	out, err = p.communicate()
 	return out
 
-
+def getRunNumber(fileName):
+	""" extract run number from DQM-like ROOT files """
+	v = fileName.split('_')
+	runNumber = v[len(v)-1].split('.')[0]
+	runNumber = runNumber[len(runNumber)-6:]
+	return int(runNumber)
 
 

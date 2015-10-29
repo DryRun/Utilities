@@ -10,15 +10,15 @@ DATAPOOL=/hcaldepot1/data/
 FILENAMEBASE=USC_
 LOGFILEBASE=/tmp/process.log
 CMSSWDIR=/nfshome0/hcaldqm/HCALDQM/CMSSW
-CMSSWVERSION=CMSSW_7_4_2
+CMSSWVERSION=CMSSW_7_4_15
 CMSSWSRC=$CMSSWDIR/$CMSSWVERSION/src
-CMSSWDQM="$CMSSWSRC/DQM/Integration/python/test"
 WORKDIR=/nfshome0/hcaldqm/HCALDQM/scripts
 STATUSDIR="$WORKDIR/status"
 DQMOUTPUT=$WORKDIR/output
-MINRUNNUMBER=253682
-SIZETHRESHOLD=160000000
+MINRUNNUMBER=250000
+SIZETHRESHOLD=600000000
 LONGSHORT=$1
+DEBUG=$2
 
 #
 #	Determine if there is a lock set.
@@ -38,11 +38,12 @@ fi
 #	Initialize env vars
 cd $CMSSWSRC
 source /opt/offline/cmsset_default.sh
+export SCRAM_ACRCH=slc6_amd64_gcc491
 eval `cmsenv`
 eval `scram b -j 8`
 cd $WORKDIR
 
-#	List all files to available in the pool
+#	List all files that are available in the pool
 for FILE in $DATAPOOL/USC_*.root; do
 
 	#	get the run number
@@ -60,7 +61,7 @@ for FILE in $DATAPOOL/USC_*.root; do
 	if [[ $RUNNUMBER -lt $MINRUNNUMBER ]]; then
 		continue
 	fi
-	if [[ $LONGSHORT == "LONG" && $SIZETHRESHOLD -gt $FILESIZE ]]; then
+	if [[ $LONGSHORT == "LONG" && $FILESIZE -lt $SIZETHRESHOLD ]]; then
 		continue
 	fi
 	if [[ $LONGSHORT == "SHORT" && $FILESIZE -gt $SIZETHRESHOLD ]]; then
@@ -68,15 +69,23 @@ for FILE in $DATAPOOL/USC_*.root; do
 	fi
 	
 	#	do the cmsRun if this file isn't present
+	if [[ -e $STATUSDIR/status/processing/$RUNNUMBER ]]; then
+		continue
+	fi
 	if [[ ! -e $STATUSDIR/status/processed/$RUNNUMBER ]]; then
 		echo "Processing FileName: $FILE" > $LOGFILE
 		touch $STATUSDIR/status/processing/$RUNNUMBER
-		if cmsRun $CMSSWDQM/new_hcal_dqm_Local.py inputFiles=$FILE	\
-			> $LOGFILE 2>&1; then
-			touch $STATUSDIR/status/processed/$RUNNUMBER
+		if [[ $DEBUG==1 ]]; then
+			echo "DEBUG: cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=$FILE"
 		else
-			touch $STATUSDIR/status/failed/$RUNNUMBER
-			rm $STATUSDIR/status/processing/$RUNNUMBER
+
+			if cmsRun $CMSSWDQM/new_hcal_dqm_Local.py inputFiles=$FILE	\
+				> $LOGFILE 2>&1; then
+				touch $STATUSDIR/status/processed/$RUNNUMBER
+			else
+				touch $STATUSDIR/status/failed/$RUNNUMBER
+				rm $STATUSDIR/status/processing/$RUNNUMBER
+			fi
 		fi
 	fi
 done
@@ -85,7 +94,7 @@ done
 rm $LOCKFILE
 
 #	set up the trap
-trap "exit" INT TERM EXIT
+trap "rm $LOCKFILE; exit" INT TERM EXIT
 
 
 
