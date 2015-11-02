@@ -51,7 +51,7 @@ class RunInfoDBWrapper:
 						continue
 					self.lInfo[key][sel] = o
 					break
-		self.saveInfo()
+		return self.saveInfo()
 
 	def stripConfig(self, config):
 		v = config.split("/")
@@ -91,6 +91,21 @@ class RunInfoDBWrapper:
 		f.write(str)
 		f.close()
 
+		#	return the string-type of the Run
+		cfgname = self.stripConfig(self.lInfo["CONFIGURATION"]["STRING_VALUE"])
+		if "pedestal" in cfgname.lower():
+			return "pedestal"
+		elif "led" in cfgname.lower():
+			return "led"
+		elif "raddam" in cfgname.lower():
+			return "raddam"
+		elif "laser" in cfgname.lower():
+			return "laser"
+		else:
+			return "UNKNOWN"
+
+		return "UNKNOWN"
+
 #
 #	upon exec
 #	a file <runnumber>.info will be generated in the folder specficed as 
@@ -101,7 +116,8 @@ if __name__=="__main__":
 	pathToSave = sys.argv[2]
 	templ = sys.argv[3]
 	wrapper = RunInfoDBWrapper(runNumber, pathToSave, templ)
-	wrapper.generate()
+	rstr = wrapper.generate()
+	print rstr
 
 
 
