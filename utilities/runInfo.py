@@ -43,7 +43,7 @@ class RunInfoDBWrapper:
 					"sqlplus -S cms_hcl_runinfo/run2009info@cms_rcms @%s %s %s %s"
 					% (self.templ, sel, self.lNames[key], self.runNumber))
 				cmd = cmd.split(" ")
-				output = utilities.do(cmd)
+				output,err = utilities.do(cmd)
 				for o in output.split("\n"):
 					if o=="":
 						continue

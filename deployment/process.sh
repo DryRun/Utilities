@@ -76,9 +76,10 @@ clean1() {
 
 copy1() {
 	mkdir $DQMOUTPUT/DQM_V0001_Hcal_R000$1_0
-	mv $WORKDIR/DQM_V0001_Hcal_R000$1.root $DQMOUTPUT/DQM_V0001_Hcal_R000$1_0
-	cp -r $DQMOUTPUT/DQM_V0001_Hcal_R000$1_0 $DESTPOOL 
-
+	DESTINATION=$DQMOUTPUT/DQM_V0001_Hcal_R000$1_0
+	mv $WORKDIR/DQM_V0001_Hcal_R000$1.root $DESTINATION
+	mv $1.xml $1.txt $DESTINATION
+	cp -r $DESTINATION $DESTPOOL 
 }
 
 process() {
@@ -126,11 +127,19 @@ process() {
 		if [[ ! -e $STATUSDIR/processed/$RUNNUMBER ]]; then
 			echo "Processing FileName: $FILE" > $LOGFILE
 			if [[ $DEBUG == 1 ]]; then
-				echo "DEBUG: cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=file:$FILE"
+#				echo "DEBUG: cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=file:$FILE"
+				echo "DEBUG: ./cmsRun_local.py $FILE $RUNNUMBER $WORKDIR $LOGFILE"
 			else
 				touch $STATUSDIR/processing/$RUNNUMBER
-				if cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=file:$FILE	\
-					> $LOGFILE 2>&1; then
+#				if cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=file:$FILE	\
+#					> $LOGFILE 2>&1; then
+#					touch $STATUSDIR/processed/$RUNNUMBER
+#					copy1($RUNNUMBER)
+#				else
+#					touch $STATUSDIR/failed/$RUNNUMBER
+#					rm $STATUSDIR/processing/$RUNNUMBER
+#				fi
+				if `./cmsRun_local.py $FILE $RUNNUMBER $WORKDIR $LOGFILE`; then
 					touch $STATUSDIR/processed/$RUNNUMBER
 					copy1($RUNNUMBER)
 				else
@@ -144,13 +153,21 @@ process() {
 
 process1() {
 	if [[ $DEBUG == 1 ]]; then
-		echo "DEBUG: cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=file:$DATAPOOL/USC_$1.root"
+#		echo "DEBUG: cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=file:$DATAPOOL/USC_$1.root"
+		echo "DEBUG: ./cmsRun_local.py $DATAPOOL/USC_$1.root $1 $WORKDIR process1.log"
 	else
 		touch $STATUSDIR/processing/$1
-		if cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=file:$DATAPOOL/USC_$1.root; then
+#		if cmsRun $WORKDIR/hcal_dqm_local_cfg.py inputFiles=file:$DATAPOOL/USC_$1.root; then
+#			touch $STATUSDIR/processed/$1
+#			copy1($1)
+#		else
+#			touch $STATUSDIR/failed/$1
+#			rm $STATUSDIR/processing/$1
+#		fi
+		if `./cmsRun_local.py $DATAPOOL/USC_$1.root $1 $WORKDIR process1.log`; then
 			touch $STATUSDIR/processed/$1
 			copy1($1)
-		else
+		else 
 			touch $STATUSDIR/failed/$1
 			rm $STATUSDIR/processing/$1
 		fi

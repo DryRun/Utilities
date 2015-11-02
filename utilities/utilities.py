@@ -25,7 +25,7 @@ def cd(dirName):
 def do(cmd):
 	p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	out, err = p.communicate()
-	return out
+	return out,err
 
 def getRunNumber(fileName):
 	""" extract run number from DQM-like ROOT files """
