@@ -1,13 +1,8 @@
 #!/usr/bin/python
 
 """
-file:				runInfo.py
+file:				RunInfoDBWrapper.py
 Author:				Viktor Khristenko
-
-description:
-	Run Info DB related gymnastics.
-	- generating xml file from db query
-	- loading an xml file in
 """
 
 #
@@ -69,6 +64,7 @@ class RunInfoDBWrapper:
 	#	2) configuration
 	#	3) timestamp
 	def saveInfo(self):
+		#	Save as xml
 		top = ET.Element("RunInfo")
 		child_rn = ET.SubElement(top, "RunNumber")
 		child_rn.text = self.runNumber
@@ -86,9 +82,18 @@ class RunInfoDBWrapper:
 		tree = ET.ElementTree(top)
 		tree.write("%s.xml" % self.runNumber)
 
+		#	Save as txt
+		f = open("%s.txt" % self.runNumber, "w")
+		str = "{0:20} {1:20} {2:40} {3:30}".format(self.runNumber,
+			self.lInfo["NEVENTS"]["STRING_VALUE"], 
+			self.stripConfig(self.lInfo["CONFIGURATION"]["STRING_VALUE"]),
+			self.lInfo["CONFIGURATION"]["TIME"])
+		f.write(str)
+		f.close()
+
 #
 #	upon exec
-#	a file <runnumber>.xml will be generated in the folder specficed as 
+#	a file <runnumber>.info will be generated in the folder specficed as 
 #	<pathToSave>
 #
 if __name__=="__main__":
