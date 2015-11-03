@@ -23,11 +23,12 @@ def prettify(elem):
 #	A Simple Run Info Wrapper
 #
 class RunInfoDBWrapper:
-	def __init__(self, runNumber, pathToSave, templ):
+	def __init__(self, runNumber, pathToSave, templ, log):
 		#	inputs
 		self.runNumber = runNumber
 		self.pathToSave = pathToSave
 		self.templ = templ
+		self.log = log
 
 		#	Set up DB things
 		self.lNames = {"NEVENTS" : "CMS.HCAL%:TRIGGERS", 
@@ -43,7 +44,9 @@ class RunInfoDBWrapper:
 					"sqlplus -S cms_hcl_runinfo/run2009info@cms_rcms @%s %s %s %s"
 					% (self.templ, sel, self.lNames[key], self.runNumber))
 				cmd = cmd.split(" ")
-				output,err = utilities.do(cmd)
+				output,err,rt = utilities.do(cmd)
+				self.log.write(output+'\n')
+				self.log.write(err+'\n')
 				for o in output.split("\n"):
 					if o=="":
 						continue
@@ -115,7 +118,8 @@ if __name__=="__main__":
 	runNumber = sys.argv[1]
 	pathToSave = sys.argv[2]
 	templ = sys.argv[3]
-	wrapper = RunInfoDBWrapper(runNumber, pathToSave, templ)
+	log = open("runInfo.log.tmp", "w")
+	wrapper = RunInfoDBWrapper(runNumber, pathToSave, templ, log)
 	rstr = wrapper.generate()
 	print rstr
 
