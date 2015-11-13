@@ -14,7 +14,8 @@ TMPSTORAGE=/nfshome0/hcaldqm/HCALDQM/scripts/temporary
 FILENAMEBASE=DQM_V0001_Hcal_R000
 LENGTHFILENAMEBASE=${#FILENAMEBASE}
 DEBUG=$1
-HTTPADDRESS="http://hcaldqm01.cms:8060/dqm/dev"
+HTTPADDRESS01="http://hcaldqm01.cms:8060/dqm/dev"
+HTTPADDRESSCMSWEB="http://cmshcal10.cern.ch:8060/dqm/dev"
 STATUSDIR=/nfshome0/hcaldqm/HCALDQM/scripts/status
 
 
@@ -84,8 +85,18 @@ for DIR in $DATAPOOL/DQM_V0001_Hcal_*; do
 	LENGTHBASE=${#DIR}
 	POS=`expr $LENGTHBASE + 1 + $LENGTHFILENAMEBASE`
 	LENGTH=6
-	FILENAME=`ls $DIR/*.root`
+	if [[ ! -e `ls $DIR/*.root` ]]; then
+		echo "There is folder, but no ROOT file"
+		continue
+	else
+		FILENAME=`ls $DIR/*.root`
+	fi
 	RUNNUMBER="${FILENAME:$POS:$LENGTH}"
+
+	#
+	#	The following if statements are for protection completeness
+	#	
+	#
 	if [[ -e $STATUSDIR/failed/$RUNNUMBER ]]; then
 		continue
 	fi
@@ -111,7 +122,7 @@ for DIR in $DATAPOOL/DQM_V0001_Hcal_*; do
 			echo "Uploading FileName: $FILENAMETOUPLOAD"
 		else
 			echo "Uploadin FileName: $FILENAMETOUPLOAD"
-			if visDQMUpload $HTTPADDRESS $FILENAMETOUPLOAD; then
+			if visDQMUpload $HTTPADDRESS01 $FILENAMETOUPLOAD; then
 				touch $DQMGUI/indexed/$RUNNUMBER
 			else
 				touch $DQMGUI/failed/$RUNNUMBER
