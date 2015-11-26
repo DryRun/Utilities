@@ -1,0 +1,93 @@
+
+
+
+layout 01 HCAL RAW/DIGI/TP/RECHIT Summary
+2 2
+RawTask/Summary/Summary:HCAL RAW Format Summary per FED
+RecHitTask/Summary/Summary:HCAL REC HIT Format Summary per SubDetetor
+DigiTask/Summary/Summary:HCAL DIGI Format Summary per SubDetetor
+TPTask/Summary/Summary:HCAL Trigger Primitive Format Summary per SubDetetor
+
+layout 02 HCAL DIGI Occupancy vs LS
+2 2
+HcalDigiTask/Occupancy/vsLS_SubDet/OccupancyvsLS_HB:HB Occupancy vs LS
+HcalDigiTask/Occupancy/vsLS_SubDet/OccupancyvsLS_HE:HE Occupancy vs LS
+HcalDigiTask/Occupancy/vsLS_SubDet/OccupancyvsLS_HF:HF Occupancy vs LS
+HcalDigiTask/Occupancy/vsLS_SubDet/OccupancyvsLS_HO:HO Occupancy vs LS
+
+layout 03 HCAL DIGI Occupancy 2D
+2 2
+HcalDigiTask/Occupancy/depth_SumQHBHE20HO20HF20/Occupancy_Depth1:Depth 1 Occupancy.
+HcalDigiTask/Occupancy/depth_SumQHBHE20HO20HF20/Occupancy_Depth2:Depth 2 Occupancy.
+HcalDigiTask/Occupancy/depth_SumQHBHE20HO20HF20/Occupancy_Depth3:Depth 3 Occupancy.
+HcalDigiTask/Occupancy/depth_SumQHBHE20HO20HF20/Occupancy_Depth4:Depth 4 Occupancy.
+
+layout 04 HCAL DIGI Missing Channels per 1LS
+2 2
+HcalDigiTask/Missing/1LS_depth/Missing_Depth1:Depth 1 Missing channels per 1LS. Updated each 10LS
+HcalDigiTask/Missing/1LS_depth/Missing_Depth2:Depth 2 Missing channels per 1LS. Updated each 10LS
+HcalDigiTask/Missing/1LS_depth/Missing_Depth3:Depth 3 Missing channels per 1LS. Updated each 10LS
+HcalDigiTask/Missing/1LS_depth/Missing_Depth4:Depth 4 Missing channels per 1LS. Updated each 10LS
+
+layout 05 HCAL DIGI Missing Channels per 1LS vs LS
+2 2
+HcalDigiTask/Missing/1LSvsLS_SubDet/Missing_HB:Number of HB missing channels per 1LS.
+HcalDigiTask/Missing/1LSvsLS_SubDet/Missing_HE:Number of HE missing channels per 1LS.
+HcalDigiTask/Missing/1LSvsLS_SubDet/Missing_HF:Number of HF missing channels per 1LS.
+HcalDigiTask/Missing/1LSvsLS_SubDet/Missing_HO:Number of HO missing channels per 1LS.
+
+layout 06 HCAL RECHIT Timing 2D
+2 2
+HcalRecHitTask/Timing/depth_EHBHE5HO5HF5/Timing_Depth1:Depth 1 Timing.
+HcalRecHitTask/Timing/depth_EHBHE5HO5HF5/Timing_Depth2:Depth 2 Timing.
+HcalRecHitTask/Timing/depth_EHBHE5HO5HF5/Timing_Depth3:Depth 3 Timing.
+HcalRecHitTask/Timing/depth_EHBHE5HO5HF5/Timing_Depth4:Depth 4 Timing.
+
+layout 07 HCAL RECHIT HBHEabc Timing
+1 3
+HcalRecHitTask/Timing/HBHEPartition_EHBHE5HO5HF5/Timing_HBHEa:HBHEa Timing
+HcalRecHitTask/Timing/HBHEPartition_EHBHE5HO5HF5/Timing_HBHEb:HBHEb Timing
+HcalRecHitTask/Timing/HBHEPartition_EHBHE5HO5HF5/Timing_HBHEc:HBHEc Timing
+
+layout 08 HCAL RECHIT Energy 2D
+2 2
+HcalRecHitTask/Energy/depth_EHBHE5HO5HF5/Energy_Depth1:Depth 1 Energy
+HcalRecHitTask/Energy/depth_EHBHE5HO5HF5/Energy_Depth2:Depth 2 Energy
+HcalRecHitTask/Energy/depth_EHBHE5HO5HF5/Energy_Depth3:Depth 3 Energy
+HcalRecHitTask/Energy/depth_EHBHE5HO5HF5/Energy_Depth4:Depth 4 Energy
+
+layout 09 HCAL RECHIT Energy per SubDetector
+2 2
+HcalRecHitTask/Energy/SubDet/Energy_HB:Energy HB
+HcalRecHitTask/Energy/SubDet/Energy_HE:Energy HE
+HcalRecHitTask/Energy/SubDet/Energy_HF:Energy HF
+HcalRecHitTask/Energy/SubDet/Energy_HO:Energy HO
+
+layout 10 HCAL TP Occupancy vs LS
+2 2
+HcalTPTask/Occupancy/DatavsLS_TPSubDet/Occupancy_Data_HBHE:HBHE Data TPs Occupancy vs LS
+HcalTPTask/Occupancy/DatavsLS_TPSubDet/Occupancy_Data_HF:HF Data TPs Occupancy vs LS
+HcalTPTask/Occupancy/DatavsLS_TPSubDet/Occupancy_Emul_HBHE:HBHE Emulator TPs Occupancy vs LS
+HcalTPTask/Occupancy/DatavsLS_TPSubDet/Occupancy_Emul_HF:HF Emulator TPs Occupancy vs LS
+
+layout 11 HCAL TP Occupancy 2D
+1 2
+HcalTPTask/Occupancy/Occupancy_Data:Data Occupancy
+HcalTPTask/Occupancy/Occupancy_Emul:Emulator Occupancy
+
+layout 12 HCAL TP Et Correlation vs LS
+1 2
+HcalTPTask/Et/CorrRatiovsLS_TPSubDet/CorrelationRatio_HBHE:HBHE Data/Emulator Correlation Ratio
+HcalTPTask/Et/CorrRatiovsLS_TPSubDet/CorrelationRatio_HF:HF Data/Emulator Correlation Ratio
+
+layout 13 HCAL TP Et Correlation 2D
+1 2
+HcalTPTask/Et/Correlation_TPSubDet/Et_DatavsEmul_HBHE:HBHE Et Correlation
+HcalTPTask/Et/Correlation_TPSubDet/Et_DatavsEmul_HF:HF Et Correlation
+
+layout 13 HCAL TP Number of Mismatches vs LS
+1 2
+HcalTPTask/Et/MismatchedvsLS_TPSubDet/EtMismatched_HBHE:HBHE Number of Et Mismatches per Event vs LS
+HcalTPTask/Et/MismatchedvsLS_TPSubDet/EtMismatched_HF:HF Number of Et Mismatches per Event vs LS
+
+
