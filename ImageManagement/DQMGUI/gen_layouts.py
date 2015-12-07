@@ -48,7 +48,7 @@ def main(f, inp):
 			il+=1
 			continue
 		if lines[il][0:6]=="layout":
-			name = lines[il][7:]
+			name = lines[il][7:].rstrip()
 			n = int(lines[il+1].split()[0])
 			m = int(lines[il+1].split()[1])
 			v = [[["", ""] for jj in range(m)]for ii in range(n)]
@@ -56,7 +56,8 @@ def main(f, inp):
 				for j in range(m):
 					l = lines[il+2+j+i*m]
 					v[i][j] = l.split(":")
-					v[i][j][1] = "Hcal/"+v[i][j][1].rstrip("\n")
+					v[i][j][1] = v[i][j][1].rstrip("\n")
+					v[i][j][0] = "Hcal/"+v[i][j][0]
 			create_layout(f, v, name, n, m)
 		else:
 			print "line:",lines[il]
