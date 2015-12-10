@@ -9,7 +9,7 @@ import sys
 import ROOT as R
 
 #	to import utilities modules
-utilDir = "/Users/vk/software/HCALDQM/Utilities/utilities"
+utilDir = "/Users/vk/software/HCALDQM/Utilities/Utils"
 sys.path[len(sys.path):] = [utilDir]
 import utilities as util
 
