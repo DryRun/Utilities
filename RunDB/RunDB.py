@@ -1,7 +1,6 @@
-
-#
-#	RunDB - Manager over the Run Database
-#
+"""
+RunDB - Manager over the Run Database
+"""
 
 from OnlineRun import OnlineRun
 from OfflineRun import OfflineRun
