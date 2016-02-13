@@ -21,7 +21,7 @@ class Run:
 		return self.__nevents
 
 	def processingType(self):
-		return "Run"
+		return "run"
 
 	def timestamp(self):
 		return self.__timestamp
@@ -37,6 +37,10 @@ class Run:
 
 	def changeState(self, state):
 		self__state = state
+
+	def resolve(self):
+		""" Most important function. Provides a clear resolution for a branch """
+		return ("", self.run())
 
 if __name__=="__main__":
 	print "Hello"

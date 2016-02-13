@@ -10,7 +10,10 @@ class OnlineRun(Run):
 		return self.__stream
 
 	def processingType(self):
-		return "Online"
+		return "online"
+
+	def resolve(self):
+		return (self.stream(), self.run())
 
 if __name__=="__main__":
 	print "OnlineRun Hello"

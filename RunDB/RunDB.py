@@ -1,13 +1,16 @@
 """
-RunDB - Manager over the Run Database
+RunDB - API with the Run Database
 """
+
+import sys, os
+pathTohcaldqm = os.environ["HCALDQM"]
+pathToUtilities = pathTohcaldqm+"/"+"Utilities"
+sys.path.append(pathToUtilities)
 
 from OnlineRun import OnlineRun
 from OfflineRun import OfflineRun
 from LocalRun import LocalRun
-
 import shelve
-import RunDBSettings as settings
 
 class RunDB:
 	"""
@@ -38,12 +41,18 @@ class RunDB:
 				RunObject
 			LocalRun2:
 				RunObject
+		Config:
+			LocalRun1: RunObject
+			LocalRun2: RunObject
 
-	NOTE: Curruntly use 1 processing type per DB
 	"""
-	def __init__(self, dbname, processingtype):
-		self.__dbname = dbname
-		self.__ptype = processingtype
+	def __init__(self, msettings):
+		""" 
+		dbname - pathname to the DB
+		db is the pointer to the DB 
+		"""
+		self.settings = msettings
+		self.__dbname = self.settings.dbname
 		self.__db = None
 
 	#
@@ -65,185 +74,131 @@ class RunDB:
 		However, new Datasets could be added, new configurations...
 		or new processing types
 		"""
-		d = {}
-		for x in settings.structure[self.__ptype]:
-			d[x] = {}
-		self.__db[self.__ptype] = d
+		for ptype in self.settings.processingTypes:
+			d = {}
+			for x in self.settings.structure[ptype]:
+				d[x.lower()] = {}
+			self.__db[ptype.lower()] = d
+
+	def checkptype(self, ptype, runobj):
+		return (ptype.lower()==runobj.processingType().lower() or 
+			runobj.processingType().lower() in ptype.lower())
 
 	#
-	#	Exist/Find functions
+	#	Exist/Find functions by Run Object
+	#	Assume you have complete object resolution
 	#
-	def find(self, runobj):
+	def find(self, ptype, runobj):
 		""" object is returned, otherwise None"""
-		db = self.__db[self.__ptype]
-		#	if this configuration, dataset or stream exists
-		s = self.secondlvl(runobj)
-		if s in db.keys():
-			#	if such run number exists
-			if runobj.run() in db[s].keys():
-				return db[s][runobj.run()]
+		#	get the branch
+		if not self.checkptype(ptype, runobj):
+			return None
+		branch = self.__db[ptype]
+		(x, run) = runobj.resolve()
+		if x in branch.keys():
+			if run in branch[x]:
+				return branch[x][run]
 
+		#	return None in the end
 		return None
 
-	def exists(self, runobj):
+	def exists(self, ptype, runobj):
 		"""  """
-		return self.find(runobj)!=None
+		return self.find(ptype, runobj)!=None
 
 	#
 	#	Content modifiers
 	#
-	def addRun(self, runobj):
+	def add(self, ptype, runobj):
 		""" add the run object into the database. If already present,return"""
-		if self.exists(runobj):
+		if not self.checkptype(ptype, runobj):
+			return
+		#	do not add if exists
+		if self.exists(ptype, runobj):
 			return
 
-		if runobj.processingType()!=self.__ptype:
-			print "Trying to add wrong processing type"
-			return
+		branch = self.__db[ptype]
+		(x,run) = runobj.resolve()
+		#	does such path exist in the DB
+		if x not in branch.keys():
+			branch[x] = {}
+		branch[x][run] = runobj
+		self.__db[ptype] = branch
 
-		if runobj.processingType()=="Online":
-			self.addOnline(runobj)
-		elif runobj.processingType()=="Offline":
-			self.addOffline(runobj)
-		elif runobj.processingType()=="Local":
-			self.addLocal(runobj)
-		else:
-			print "Unknown Processing Type - Corruption"
-			return
 
-	def deleteRun(self, runobj):
+	def delete(self, ptype, runobj):
 		""" deletes the run object from the database if present """
-		if not self.exists(runobj):
+		if not self.checkptype(ptype, runobj):
+			return
+		#	cannot delete if exists
+		if self.exists(ptype, runobj):
 			return
 
-		if not self.validPType(runobj):
-			print "Invalid processing type"
-			return
+		branch = self.__db[ptype]
+		(x, run) = runobj.resolve()
+		branch[x][run].pop(run)
+		self.__db[ptype] = branch
 
-		if self.__ptype=="Online":
-			self.deleteOnline(runobj)
-		elif self.__ptype=="Offline":
-			self.deleteOffline(runobj)
-		elif self.__ptype=="Local":
-			self.deleteLocal(runobj)
-		else:
-			print "Unknown processing type - Corruption"
-			return
-
-	def updateRun(self, runobj):
+	def update(self, ptype, runobj):
 		""" 
-		Update or replace the run. No check for existence.
+		Update or replace the run. Assume it already exists
 		Assume you don't modify the structure-based parameters
 		"""
-		if not self.validPType(runobj):
-			print "Invalid processing type"
-			return
-
-		if self.__ptype=="Online":
-			self.addOnline(runobj)
-		elif self.__ptype=="Offline":
-			self.addOffline(runobj)
-		elif self.__ptype=="Local":
-			self.addLocal(runobj)
-		else:
-			print "Unknown processing type - Corruption"
-			return
-	
-	def addOnline(self, runobj):
-		onlineruns = self.__db["Online"]
-		if runobj.stream() not in onlineruns.keys():
-			onlineruns[runobj.stream()] = {}
-		onlineruns[runobj.stream()][runobj.run()] = runobj
-		self.__db["Online"] = onlineruns
-
-	def addOffline(self, runobj):
-		offlineruns = self.__db["Offline"]
-		if runobj.dataset() not in offlineruns.keys():
-			offlineruns[runobj.dataset()]={}
-		offlineruns[runobj.dataset()][runobj.run()] = runobj
-		self.__db["Offline"] = offlineruns
-
-	def addLocal(self, runobj):
-		localruns = self.__db["Local"]
-		if runobj.configuration() not in localruns.keys():
-			localruns[runobj.configurarion]={}
-		localruns[runobj.configuration()][runobj.run()] = runobj
-		self.__db["Local"] = localruns
-
-	def deleteOnline(self, runobj):
-		onlineruns = self.__db["Online"]
-		onlineruns[self.secondlvl(runobj)].pop(runobj.run())
-		self.__db["Online"] = onlineruns
-	
-	def deleteOffline(self, runobj):
-		offlineruns = self.__db["Offline"]
-		offlineruns[self.secondlvl(runobj)].pop(runobj.run())
-		self.__db["Offline"] = offlineruns
-
-	def deleteLocal(self, runobj):
-		localruns = self.__db["Local"]
-		localruns[self.secondlvl(runobj)].pop(runobj.run())
-		self.__db["Local"] = localruns
+		branch = self.__db[ptype]
+		(x, run) = runobj.resolve()
+		branch[x][run] = runobj
+		self.__db[ptype] = branch
 
 	#
 	#	Print Information
 	#
 	def printDB(self):
 		""" Print the DB Structure """
+
+		print "Printing Run DB"
 		for ptype in self.__db.keys():
-			print ptype
-			print self.__db[ptype]
-
-	#
-	#	Helpful functions
-	#
-	def secondlvl(self, runobj):
-		"""
-		as our DB has 3-level structure, get 2nd level
-		"""
-		db = self.__db[self.__ptype]
-		if self.__ptype=="Online":
-			return runobj.stream()
-		elif self.__ptype=="Offline":
-			return runobj.dataset()
-		elif self.__ptype=="Local":
-			return runobj.configuration()
-		return "None"
-
-	def validPType(self, runobj):
-		return self.__ptype==runobj.processingType()
+			branch = self.__db[ptype]
+			s = "---"
+			print s+"  "+ptype
+			for x in branch.keys():
+				print s*4 + "  " + x + ":"
+				for run in branch[x].keys():
+					print s*8+"  "+run
 
 #
 #	Testing
 #
 if __name__=="__main__":
 	print "RunDB Hello"
-	dbOnline = RunDB("RunDBOnline", "Online")
-	dbOnline.initialize()
-	dbOnline.printDB()
+	import importlib, sys
+	msettings = importlib.import_module(sys.argv[1])
+	db = RunDB(msettings)
+	db.initialize()
 
-	dbOnline.finalize()
-	dbOffline = RunDB("RunDBOffline", "Offline")
-	dbOffline.initialize()
-	dbOffline.printDB()
+	for i in range(1000):
+		r = LocalRun(i, 100, "2015:01:01", "pedestal")
+		db.add("local", r)
+		r = OnlineRun(i, 100, "2015:01:01", "physics")
+		db.add("online-central", r)
+		r = OfflineRun(1, 100, "2015:01:01", "DATASET4")
+		db.add("offline-central", r)
+	for i in range(1000):
+		r = LocalRun(i, 100, "2015:01:01", "pedestal")
+		db.delete("local", r)
+		r = OnlineRun(i, 100, "2015:01:01", "physics")
+		db.delete("online-central", r)
+		r = OfflineRun(1, 100, "2015:01:01", "DATASET4")
+		db.delete("offline-central", r)
 
-	run1 = OfflineRun(1111, 100, "2015:01:01", "NEWDATASET")
-	run2 = OfflineRun(1111, 100, "2015:01:01", "DATASET2")
-	run3 = OfflineRun(1111, 100, "2015:01:01", "DATASET3")
-	run4 = OfflineRun(1111, 100, "2015:01:01", "DATASET4")
-	run5 = OfflineRun(255535, 100000, "2016:01:01", "MINBIAS")
-	run6 = OfflineRun(255600, 100000, "2016:01:01", "MINBIAS")
-	dbOffline.addRun(run1)
-	dbOffline.addRun(run2)
-	dbOffline.addRun(run3)
-	dbOffline.addRun(run4)
-	dbOffline.addRun(run5)
-	dbOffline.addRun(run6)
+	run1 = LocalRun(1, 100, "2015:01:01", "laserhf")
+	run2 = LocalRun(2, 100, "2015:01:01", "pedestal")
+	run3 = LocalRun(3, 100, "2015:01:01", "laserhho")
 
-	dbOffline.deleteRun(run2)
+	run4 = OfflineRun(1, 100, "2015:01:01", "DATASET1")
+	run5 = OfflineRun(2, 100, "2015:01:01", "DATASET2")
+	run6 = OfflineRun(3, 100, "2015:01:01", "DATASET3")
 
-	dbOffline.printDB()
+	db.printDB()
 
-	dbOffline.finalize()
-
+	db.finalize()
 

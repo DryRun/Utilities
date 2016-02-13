@@ -14,7 +14,10 @@ class LocalRun(Run.Run):
 		return self.__config
 
 	def processingType(self):
-		return "Local"
+		return "local"
+
+	def resolve(self):
+		return (self.configuration(), self.run())
 
 if __name__=="__main__":
 	print "LocalRun Hello"

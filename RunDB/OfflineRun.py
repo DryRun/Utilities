@@ -14,7 +14,10 @@ class OfflineRun(Run):
 		return self.__dataset
 
 	def processingType(self):
-		return "Offline"
+		return "offline"
+
+	def resolve(self):
+		return (self.dataset(), self.run())
 
 if __name__=="_main__":
 	print "OfflineRun hello"
