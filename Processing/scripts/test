@@ -1,0 +1,1 @@
+sqlplus -S cms_hcl_runinfo/run2009info@cms_rcms @/data/hcaldqm/HCALDQM/Utilities/WBM/sql_templates/query.sql STRING_VALUE CMS.HCAL%:LOCAL_RUN_KEY 264825

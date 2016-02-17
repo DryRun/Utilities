@@ -4,7 +4,7 @@ Server Class
 
 
 import sys,os
-pathTohcaldqm = os.environ["HCALDQM"]
+pathTohcaldqm = os.environ["HCALDQMSRC"]
 pathToUtilities = pathTohcaldqm+"/"+"Utilities"
 sys.path.append(pathToUtilities)
 

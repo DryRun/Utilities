@@ -3,7 +3,7 @@ Server Client to test the Servers functionality
 """
 
 import importlib, sys, os
-pathTohcaldqm = os.environ["HCALDQM"]
+pathTohcaldqm = os.environ["HCALDQMSRC"]
 pathUtilities = pathToUtilities = pathTohcaldqm+"/"+"Utilities"
 sys.path.append(pathToUtilities)
 
