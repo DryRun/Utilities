@@ -121,7 +121,7 @@ class RunDB:
 		(x,run) = runobj.resolve()
 		#	does such path exist in the DB
 		if x not in branch.keys():
-			branch[x] = {}
+			branch[x.lower()] = {}
 		branch[x][run] = runobj
 		self.__db[ptype] = branch
 
@@ -130,13 +130,10 @@ class RunDB:
 		""" deletes the run object from the database if present """
 		if not self.checkptype(ptype, runobj):
 			return
-		#	cannot delete if exists
-		if self.exists(ptype, runobj):
-			return
 
 		branch = self.__db[ptype]
 		(x, run) = runobj.resolve()
-		branch[x][run].pop(run)
+		branch[x].pop(run)
 		self.__db[ptype] = branch
 
 	def update(self, ptype, runobj):
@@ -175,20 +172,20 @@ if __name__=="__main__":
 	db = RunDB(msettings)
 	db.initialize()
 
-	for i in range(1000):
-		r = LocalRun(i, 100, "2015:01:01", "pedestal")
+	for i in range(10):
+		r = LocalRun(i+10000, 100, "2015:01:01", "pedestal")
 		db.add("local", r)
-		r = OnlineRun(i, 100, "2015:01:01", "physics")
+		r = OnlineRun(i+10000, 100, "2015:01:01", "physics")
 		db.add("online-central", r)
-		r = OfflineRun(1, 100, "2015:01:01", "DATASET4")
+		r = OfflineRun(i+10000, 100, "2015:01:01", "DATASET4")
 		db.add("offline-central", r)
-	for i in range(1000):
-		r = LocalRun(i, 100, "2015:01:01", "pedestal")
-		db.delete("local", r)
-		r = OnlineRun(i, 100, "2015:01:01", "physics")
-		db.delete("online-central", r)
-		r = OfflineRun(1, 100, "2015:01:01", "DATASET4")
-		db.delete("offline-central", r)
+#	for i in range(10):
+#		r = LocalRun(i, 100, "2015:01:01", "pedestal")
+#		db.delete("local", r)
+#		r = OnlineRun(i, 100, "2015:01:01", "physics")
+#		db.delete("online-central", r)
+#		r = OfflineRun(i, 100, "2015:01:01", "DATASET4")
+#		db.delete("offline-central", r)
 
 	run1 = LocalRun(1, 100, "2015:01:01", "laserhf")
 	run2 = LocalRun(2, 100, "2015:01:01", "pedestal")

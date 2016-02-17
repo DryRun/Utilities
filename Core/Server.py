@@ -10,7 +10,7 @@ sys.path.append(pathToUtilities)
 
 from XXX import XXX
 from Communication.Socket import Socket
-from Communication.Data import Data
+from Communication.ServerData import ServerData
 import ServerCommands as cmds
 
 
@@ -33,7 +33,7 @@ class Server(XXX):
 			cmddata = c.recv(self.settings.nbytes)
 			if not cmddata: break
 			#	1. initialize Data class
-			data = Data(cmddata)
+			data = ServerData(cmddata)
 			self.dispatch(c, a, data)
 			if self.shouldStop:
 				c.close()
@@ -42,20 +42,23 @@ class Server(XXX):
 	
 	def dispatch(self, connection, address, data):
 		""" data = Data.Data object"""
-		icmd = int(data.getscmd())
-		self.cmds[icmd](data.getsdata())
+		icmd,sdata = data.unpackPacket()
+		try:
+			self.cmds[int(icmd)](sdata)
+		except IndexError:
+			print "Wrong Server Command: " + str(icmd)
 
-	def work(self, cmddata):
+	def work(self, data):
 		""" To be reimplemented based on the type of the Server """
 		return
 	
-	def stop(self, cmddata):
+	def stop(self, data):
 		self.shouldStop = True
 		return
 
-	def test(self, cmddata):
+	def test(self, data):
 		print "Hello. This is just a Test"
-		print "Data Transferred: ", cmddata
+		print "Data Transferred: ", data
 		return
 
 	def finalize(self):

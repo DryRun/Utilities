@@ -3,18 +3,25 @@ Run DB Server Class
 """
 
 from Server import Server
+import RunDB.RunDB as DB
 
 class RunDBServer(Server):
 	def __init__(self, lid, msettings):
 		Server.__init__(self, lid, msettings)
+		self.db = DB.RunDB(self.settings)
 
 	def initialize(self):
 		Server.initialize(self)
+		self.db.initialize()
 
 	def work(self, cmddata):
 		""" Reimplementfor Run DB Server here """
 		print "Running Run DB Server"
 		return
+
+	def finalize(self):
+		Server.finalize(self)
+		self.db.finalize()
 
 if __name__=="__main__":
 	import importlib, sys
