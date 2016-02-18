@@ -9,7 +9,7 @@ sys.path.append(pathToUtilities)
 
 import Utils.Shell as Shell
 import WBM.Wrapper as wbm
-import RunDB.RunDB_OLD as db
+import RunDB.RunDB_OLD as rundb
 import Processing.scripts.run_AnalysisTrend as run
 
 def locked(lockpath):
@@ -65,14 +65,19 @@ def process():
 
 			#	mark and process
 			db.mark(runnumber, runType.upper(), "processing")
-			listLastRuns,listLastRunFiles = db.getLast(runType.upper())
+			try:
+				listLastRuns,listLastRunFiles = db.getLast(runType.upper())
+			except IndexError as exc:
+				continue
 			rt = run.run(settings.cmssw_config, f, runType.upper(), 
 				settings.cmssw_harvesterconfig, listLastRuns,
 				listLastRunFiles, logfile)	
 			if rt==0: # all is good
 				db.mark(runnumber, runType.upper(), "processed")
+				logfile.write("SUCCESS %d" % runnumber)
 			else:
 				db.mark(runnumber, runType.upper(), "failed")
+				logfile.write("FAILED %d" % runnumber)
 
 if __name__=="__main__":
 	process()

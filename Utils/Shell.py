@@ -6,7 +6,8 @@ Description:
 """
 
 import sys, os
-pathToUtilities = os.environ["HCALDQMUTILITIES"]
+pathTohcaldqm = os.environ["HCALDQMSRC"]
+pathToUtilities = pathTohcaldqm+"/"+"Utilities"
 sys.path.append(pathToUtilities)
 
 #
@@ -21,6 +22,18 @@ def mkdir(dirName):
 	if not os.path.exists(dirName):
 		cmd = "mkdir %s" % dirName
 		subprocess.call(cmd, shell=True)
+
+def rm(pathfile):
+	if os.path.exists(pathfile):
+		return
+	cmd = "rm %s" % pathfile
+	subprocess.call(cmd, shell=True)
+
+def rmdir(pathdir):
+	if os.path.exists(pathdir):
+		return
+	cmd = "rm -rf %s" % pathdir
+	subprocess.call(cmd, shell=True)
 
 def touch(pathfile):
 	if not os.path.exists(pathfile)
