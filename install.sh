@@ -4,11 +4,11 @@
 #	Installation script
 #
 
-SRC=$1
-DEST=$2
+DEST=$1
+SRC=`dirname ${BASH_SOURCE[0]}`
 
-cp -r $SRC/Utilities $DEST
-export HCALDQMUTILITIES=$DEST/Utilities
+cp -r $SRC $DEST
+source $DEST/Utilities/env.sh
 
-echo "Installed HCALDQM Utilities package in $HCALDQMUTILITIES"
+echo "Installed HCALDQM Utilities package in $DEST/Utilities"
 

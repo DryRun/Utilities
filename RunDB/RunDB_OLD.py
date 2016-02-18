@@ -2,6 +2,12 @@
 Old Run DB wrapper
 """
 
+import sys, os
+pathToUtilities = os.environ["HCALDQMUTILITIES"]
+sys.path.append(pathToUtilities)
+
+import Utils.Shell as Shell
+
 class RunDB:
 	def __init__(self, msettings):
 		self.settings = msettings
