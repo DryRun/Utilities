@@ -6,14 +6,13 @@ Description:
 """
 
 import sys, os
-pathTohcaldqm = os.environ["HCALDQMSRC"]
-pathToUtilities = pathTohcaldqm+"/"+"Utilities"
+pathToUtilities = os.environ["HCALDQMUTILITIES"]
 sys.path.append(pathToUtilities)
 
 #
 #	Imports
 #
-import subprocess, glob
+import subprocess, glob, time
 
 #	
 #	File System Management
@@ -22,6 +21,24 @@ def mkdir(dirName):
 	if not os.path.exists(dirName):
 		cmd = "mkdir %s" % dirName
 		subprocess.call(cmd, shell=True)
+
+def touch(pathfile):
+	if not os.path.exists(pathfile)
+	cmd = "touch %s" % pathfile
+	subprocess.call(cmd, shell=True)
+
+def exists(path):
+	return os.path.exists(path)
+
+def getsize(path):
+	return .os.path.getsize(path)
+
+def fork():
+	return os.fork()
+
+def gettimedate():
+	""" return (time, data) """
+	return time.strftime("%X"),time.strftime("%x")
 
 def cd(dirName):
 	cmd = "cd %s" % dirName

@@ -4,8 +4,7 @@ Works for RunInfo DB - enough as of 17Feb2016
 """
 
 import os, sys
-pathTohcaldqm = os.environ["HCALDQMSRC"]
-pathToUtilities = pathTohcaldqm+"/"+"Utilities"
+pathToUtilities = os.environ["HCALDQMUTILITIES"]
 sys.path.append(pathToUtilities)
 
 import Settings.Settings_Wrapper as SWrapper
