@@ -40,7 +40,7 @@ def getRunType(wbmdb, runnumber, settings):
 def process():
 	""" processes runs """
 	settings = importlib.import_module(sys.argv[1])
-	logfile = open(settings.logfilename, "w")
+	logfile = open(settings.logfilename, "a")
 	logfile.write("Started running at %s %s\n" % (Shell.gettimedate()))
 	rdb = rundb.RunDB(settings, logfile); rdb.install()
 	
@@ -64,8 +64,6 @@ def process():
 			#	if this guy is already present in the db
 			#	go to the next guy
 			if rdb.exists(runnumber):
-				logfile.write("runnumber: %d already exists. Next \n" % (
-					runnumber))
 				continue
 			else:
 				logfile.write("process::runnumber %d doesn't exist... \n" % (
@@ -73,6 +71,7 @@ def process():
 				#	doesn't exist yet
 				runType = getRunType(wbmdb, runnumber, settings)
 				if runType==None:
+					logfile.write("process::runType is unknown.... Skipping...\n")
 					continue
 				logfile.write("runType: "+runType+"\n")
 	

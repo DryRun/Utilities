@@ -38,6 +38,47 @@ class RunDB:
 		else:
 			pass
 
+	def listFilesToUpload(self):
+		""" List all the files to be uploaded """
+		dbpool = self.settings.dbpool
+		ptype = self.settings.processingtype.upper()
+		dqmiopool = self.settings.dqmiopool
+		lfiles = []
+		if ptype=="LOCAL":
+			for runtype in self.settings.runtypes:
+				self.logfile.write("runtype: %s\n" % runtype)
+				#	list of path/runnumber
+				lpathruns = Shell.ls_glob(Shell.join(self.settings.dbpool,
+					ptype+"/"+runtype.upper()+"/*"))
+				for pathrun in lpathruns:
+					if Shell.exists(Shell.join(pathrun, "uploadFailed")):
+						continue
+					if (not Shell.exists(Shell.join(pathrun, "processed")) or
+						Shell.exists(Shell.join(pathrun, "uploaded"))):
+						continue
+					self.logfile.write("pathrun: "+pathrun+"\n")
+					dir,runnumber = Shell.split(pathrun)
+					self.logfile.write("runnumber: "+runnumber+"\n")
+					lpathfile=Shell.ls_glob(Shell.join(dqmiopool,
+					ptype+"/DQM_V*%s*%s*.root" % (runnumber, runtype)))
+					self.logfile.write("lpathfile: "+str(lpathfile)+"\n")
+					if len(lpathfile)==0 or len(lpathfile)>1:
+						raise Exception(lpathfile, 
+							"Files with the same Run Number and Type found or Empty lit")
+					else:
+						lfiles[len(lfiles):] = lpathfile
+
+		return lfiles
+
+	def runTypeByFileName(self, filename):
+		for runtype in self.settings.runtypes:
+			if runtype.upper() in filename:
+				return runtype
+	def runNumberByFileName(self, filename):
+		import re
+		match = re.search(self.settings.regexppattern, filename)
+		if self.settings.processingtype=="LOCAL":
+			return int(match.group(2))
 
 	def exists(self, runnumber):
 		dbpool = self.settings.dbpool
@@ -53,6 +94,39 @@ class RunDB:
 
 		return False
 
+	def rmmark(self, runnumber, runType, m):
+		dbpool = self.settings.dbpool
+		ptype = self.settings.processingtype.upper()
+		if Shell.exists(Shell.join(dbpool, ptype+"/"+runType.upper()+"/"+
+			runnumber+"/"+m)):
+			Shell.rm(Shell.join(dbpool, ptype+"/"+runType.upper()+"/"+
+				runnumber+"/"+m))
+
+	def validate(self):
+		""" Validate that runs that are marked as processed have files """
+		dbpool = self.settings.dbpool
+		ptype = self.settings.processingtype.upper()
+		dqmiopool = self.settings.dqmiopool
+		lfiles = []
+		if ptype=="LOCAL":
+			for runtype in self.settings.runtypes:
+				self.logfile.write("runtype: %s\n" % runtype)
+				#	list of path/runnumber
+				lpathruns = Shell.ls_glob(Shell.join(self.settings.dbpool,
+					ptype+"/"+runtype.upper()+"/*"))
+				for pathrun in lpathruns:
+					if Shell.exists(Shell.join(pathrun, "processed")):
+						self.logfile.write("pathrun: "+pathrun+"\n")
+						dir,runnumber = Shell.split(pathrun)
+						self.logfile.write("runnumber: "+runnumber+"\n")
+						lpathfile=Shell.ls_glob(Shell.join(dqmiopool,
+							ptype+"/DQM_V*%s*%s*.root" % (runnumber, runtype)))
+						self.logfile.write("lpathfile: "+str(lpathfile)+"\n")
+						if len(lpathfile)==0:
+							#	means there is no file for that run
+							self.rmmark(runnumber, runtype, "processed")
+							self.mark(int(runnumber), runtype, "failed")
+
 	def mark(self, runnumber, runType, m):
 		self.logfile.write("marking %d %s as %s\n" % (
 			runnumber, runType.upper(),m))
@@ -66,11 +140,13 @@ class RunDB:
 			Shell.mkdir(Shell.join(dbpool, s))
 			Shell.touch(Shell.join(dbpool, ptype+"/"+runType.upper()+"/"+
 				str(runnumber)+"/"+m))
-		elif m=="processed:" or m=="failed" or m=="uploaded":
+		elif m=="processed" or m=="failed" or m=="uploaded":
 			if Shell.exists(Shell.join(dbpool, ptype+"/"+runType.upper()+"/"+
 				str(runnumber))):
 					Shell.touch(Shell.join(dbpool, ptype+"/"+runType.upper()
 						+"/"+str(runnumber)+"/"+m))
+		else:
+			raise Exception("Unkown State in RunDB OLD")
 
 	def getLast(self, runType):
 		""" list the last N runfiles and runnumbers for runType """

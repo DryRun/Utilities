@@ -2,6 +2,7 @@
 
 CMSSWVERSION=$1
 LOG=$2
+source ~/.bashrc
 CMSSW=$HCALDQM/CMSSW/$CMSSWVERSION
 echo $CMSSW > $LOG
 

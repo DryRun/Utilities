@@ -36,9 +36,11 @@ def process(*argv):
 	)
 	logfile.write(cmd+"\n")
 	o,e,r = Shell.execute(cmd.split(" "))
-	print "OUTPUT Stream:\n"+o+"\n"+("-"*50)+"\n"
-	print "ERROR Stream:\n"+e+"\n"+("-"*50)+'\n'
-	return 0
+	logfile.write(("-"*50)+'\n'+"OUTPUT Stream:\n"+("-"*50)+"\n"+
+		o+"\n"+'\n')
+	logfile.write(("-"*50)+'\n'+"ERROR Stream:\n"+("-"*50)+ "\n"+
+		e+"\n"+'\n')
+	return r
 
 	#	don't do any trends for RADDAM
 #	if "RADDAM" in runType.upper():
