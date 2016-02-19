@@ -1,3 +1,4 @@
 #!/bin/bash
 
 export HCALDQMUTILITIES=`dirname ${BASH_SOURCE[0]}`
+export HCALDQMLOGS=$HCALDQMUTILITIES/../LOGS

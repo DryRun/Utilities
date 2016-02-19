@@ -42,6 +42,7 @@ class Wrapper:
 			#	file itself
 			self.logfileexists = True
 			self.logfile = argv[2]
+			self.logfile.write("Initializing Run Info DB Wrapper\n")
 
 	def query(self, *argv):
 		""" query for what is specified. """
@@ -68,7 +69,8 @@ class Wrapper:
 			o, e, rt = Shell.execute(cmd)
 		except Exception as exc:
 			if self.logfileexists:
-				self.logfile.write("Some Exception Triggered\n")
+				self.logfile.write("Exception Triggered: %s %s for Run: %s\n" %(
+					type(exc).__name__, str(exc.args), runnumber))
 				return "","",100
 
 		#	parse the output

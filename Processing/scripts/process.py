@@ -34,50 +34,76 @@ def getRunType(wbmdb, runnumber, settings):
 	# if all went good - return the type
 	return wbm.runinfo_config2runtype(o)
 
+
+
 #	this is the where processing starts
 def process():
 	""" processes runs """
-	settings = importlib.import_module(argv[1])
+	settings = importlib.import_module(sys.argv[1])
 	logfile = open(settings.logfilename, "w")
-	logfile.write("Started running at %s %s\n" % (Shell.gettimedata()))
-
+	logfile.write("Started running at %s %s\n" % (Shell.gettimedate()))
+	rdb = rundb.RunDB(settings, logfile); rdb.install()
+	
 	if locked(settings.lockpath): # return if the same process is running
+		logfile.write("lock exists. Exiting...\n")
 		return
-
-	wbmdb = wbm.Wrapper(settings.runinfo_db_name,
-		settings.runinfo_db_querytemplate, logfile)
-	runlist = Shell.ls_glob(settings.poolsource)
-	for f in runlist:
-		runnumber = runNumber(Shell.split(f)[1])
-		filesize = Shell.getsize(f)
-		if filesize>settings.filesizelimit:
-			continue
-
-		#	if this guy is already present in the db
-		#	go to the next guy
-		if db.exists(runnumber):
-			continue
-		else:
-			#	doesn't exist yet
-			runType = getRunType(db, runnumber, settings)
-			if runType==None:
+	try:
+		wbmdb = wbm.Wrapper(settings.runinfo_db_name,
+			settings.runinfo_db_querytemplate, logfile)
+		runlist = Shell.ls_glob(settings.poolsource+"/USC*.root")
+		for f in runlist:
+			runnumber = runNumber(Shell.split(f)[1])
+			filesize = Shell.getsize(f)
+			if filesize>settings.filesizelimit or \
+				runnumber<settings.firstRunToProcess:
 				continue
-
-			#	mark and process
-			db.mark(runnumber, runType.upper(), "processing")
-			try:
-				listLastRuns,listLastRunFiles = db.getLast(runType.upper())
-			except IndexError as exc:
+			logfile.write("filepath: "+f+"\n")
+			logfile.write("runnumber: "+str(runnumber)+"\n")
+			logfile.write("filesize: "+str(filesize)+'\n')
+			
+			#	if this guy is already present in the db
+			#	go to the next guy
+			if rdb.exists(runnumber):
+				logfile.write("runnumber: %d already exists. Next \n" % (
+					runnumber))
 				continue
-			rt = run.run(settings.cmssw_config, f, runType.upper(), 
-				settings.cmssw_harvesterconfig, listLastRuns,
-				listLastRunFiles, logfile)	
-			if rt==0: # all is good
-				db.mark(runnumber, runType.upper(), "processed")
-				logfile.write("SUCCESS %d" % runnumber)
 			else:
-				db.mark(runnumber, runType.upper(), "failed")
-				logfile.write("FAILED %d" % runnumber)
+				logfile.write("process::runnumber %d doesn't exist... \n" % (
+					runnumber))
+				#	doesn't exist yet
+				runType = getRunType(wbmdb, runnumber, settings)
+				if runType==None:
+					continue
+				logfile.write("runType: "+runType+"\n")
+	
+				#	get the list of last runs before you mark this run
+#				listLastRuns,listLastRunFiles = rdb.getLast(runType.upper())
+				#	mark and process
+				rdb.mark(runnumber, runType.upper(), "processing")
+				try:
+#					print listLastRuns, listLastRunFiles
+					rt = run.process(f, runType.upper(), settings, logfile)	
+					if rt==0: # all is good
+						rdb.mark(runnumber, runType.upper(), "processed")
+						logfile.write("SUCCESS %d\n" % runnumber)
+					else:
+						rdb.mark(runnumber, runType.upper(), "failed")
+						logfile.write("FAILED %d\n" % runnumber)
+				except Exception as exc:
+					logfile.write("Exception Name %s Exception Message %s\n" %
+						(type(exc).__name__, str(exc.args)))
+					rdb.mark(runnumber, runType.upper(), "failed")
+					logfile.write("FAILED %d\n" % runnumber)
+	except NameError as exc:
+		logfile.write("NameErorr has occured. Exiting...\n")
+		logfile.write("Error Message: "+str(exc.args)+'\n')
+	except Exception as exc:
+		logfile.write("Exception has been caught. Exiting... \n")
+		logfile.write("ErrorName: %s ErrorMessage: %s\n" % (
+			type(exc).__name__, str(exc.args)))
+	finally:
+		logfile.write("Finished running at %s %s\n" % (Shell.gettimedate()))
+		Shell.rm(settings.lockpath)
 
 if __name__=="__main__":
 	process()

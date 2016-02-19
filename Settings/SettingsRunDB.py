@@ -9,7 +9,7 @@ processingTypes = ["online-central", "offline-central", "local",
 onlineStreams = ["physics", "calib"]
 configurations = [
 	"pedestal", "led", "raddam", "laserhbm", "laserhbp", "laserhem",
-	"laserhep", "laserho", "laserhf"
+	"laserhep", "laserho", "laserhf", "laserhpd"
 ]
 offlineDatasets = ["MINIBIAS", "COMMISSIONING", "COSMICS",
 	"BTAG"]
@@ -17,6 +17,11 @@ offlineDatasets = ["MINIBIAS", "COMMISSIONING", "COSMICS",
 lvl2 = [onlineStreams, offlineDatasets, configurations,
 	onlineStreams, offlineDatasets]
 
-structure = {processingTypes[x]:lvl2[x] for x in range(len(lvl2))}
+structure = {}
+for i in range(len(lvl2)):
+	structure[processingTypes[i]]=lvl2[i]
+
+#	below is not compatible with python 2.6.6 and earlier
+#structure = {processingTypes[i]:lvl2[i] for i in range(len(lvl2))}
 
 
