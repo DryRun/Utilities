@@ -14,7 +14,7 @@ runinfo_db_name = "cms_hcl_runinfo/run2009info"
 runinfo_db_querytemplate = pathToUtilities+"/"+"WBM/sql_templates/query.sql"
 lockpath = "/tmp/hcaldqm/LOCAL/lock"
 poolsource = "/hcaldepot1/data"
-filesizelimit = 1500000000
+filesizelimit = 1600000000
 tmptmp = Shell.join(environment.cmsswbase, 
 	environment.cmsswversion)
 tmptmp = Shell.join(tmptmp, 
