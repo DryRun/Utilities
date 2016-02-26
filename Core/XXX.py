@@ -15,3 +15,6 @@ class XXX:
 	def work(self, cmddata):pass
 
 	def finialize(self):pass
+
+name = __file__
+print name
