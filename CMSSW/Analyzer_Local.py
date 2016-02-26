@@ -11,9 +11,9 @@ dqmguiconvention = 'Offline'
 dqmiopool = '/data/hcaldqm/DQMIO/LOCAL'
 
 #	cmssw
-useMap = False
+useMap = True
 dbMap = False
-globaltag = "74X_dataRun2_Express_v2"
+globaltag = "run2_hlt"
 emaptag = "HcalElectronicsMap_v7.00_offline"
-emapfileInPath = "version_G_emap_2015_may_20" #should sit in $CMSSW/src
+emapfileInPath = "version_G_emap_all_ngHF2016_feb24.txt" #should sit in $CMSSW/src
 nameToImport = "CMSSW.Analyzer_Local"

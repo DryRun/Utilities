@@ -10,9 +10,10 @@ echo $CMSSW > $LOG
 cd $CMSSW/src
 echo $CMSSW/src > $LOG
 source /opt/offline/cmsset_default.sh
-export SCRAM_ACRCH=slc6_amd64_gcc491
+export SCRAM_ACRCH=slc6_amd64_gcc493
 echo $SCRAM_ARCH > $LOG
 cmsenv
+#scram b clean
 scram b -j 8 > $LOG
 
 #	setup HCALDQM Utilities

@@ -7,5 +7,5 @@ import os
 
 
 cmsswbase = "/data/hcaldqm/CMSSW"
-cmsswversion = "CMSSW_7_5_7_patch2"
+cmsswversion = "CMSSW_8_0_0_patch1"
 cmsswdqmintegration = "DQM/Integration/python/clients"
