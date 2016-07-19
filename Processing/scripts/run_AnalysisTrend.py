@@ -10,11 +10,21 @@ import WBM.Wrapper as dbwrap
 import Settings.Settings_Wrapper as settingswrap
 import Utils.Shell as Shell
 
+def list2str(l):
+	s = ""
+	i = 0
+	for x in l:
+		if i>0: s+=","
+		s+=str(x)
+		i+=1
+	return s
+
 def process(*argv):
 	runFile = argv[0]
 	runType = argv[1]
 	settings = argv[2]
-	logfile = argv[3]
+	harvestlist = argv[3]
+	logfile = argv[4]
 
 #	wbmdir = pathToUtilities+"/"+"WBM/sql_templates"
 #	template = "query.sql"
@@ -29,11 +39,16 @@ def process(*argv):
 #			rt, e, o))
 #		return 100
 #	runType = dbwrap.runinfo_config2runtype(o)
-	
-	cmd = "cmsRun %s inputFiles=file:%s runType=%s settingsModuleName=%s" % (
-		settings.cmssw_analyzer_config, runFile, runType, 
-		settings.analyzer.nameToImport
-	)
+	if len(harvestlist)>0:
+		cmd = "cmsRun %s inputFiles=file:%s runType=%s settingsModuleName=%s harvestRunList=%s" % (
+			settings.cmssw_analyzer_config, runFile, runType, 
+			settings.analyzer.nameToImport, list2str(harvestlist)
+		)
+	else:
+		cmd = "cmsRun %s inputFiles=file:%s runType=%s settingsModuleName=%s" % (
+			settings.cmssw_analyzer_config, runFile, runType, 
+			settings.analyzer.nameToImport
+		)
 	logfile.write(cmd+"\n")
 	o,e,r = Shell.execute(cmd.split(" "))
 	logfile.write(("-"*50)+'\n'+"OUTPUT Stream:\n"+("-"*50)+"\n"+

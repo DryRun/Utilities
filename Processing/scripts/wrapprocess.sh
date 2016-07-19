@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#
+#	Run with ./wrapprocess.sh <CMSSWVERSION> <LOGFILENAME>
+#
+
 CMSSWVERSION=$1
 LOG=$2
 source ~/.bashrc

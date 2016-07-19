@@ -57,42 +57,43 @@ def process():
 			if filesize>settings.filesizelimit or \
 				runnumber<settings.firstRunToProcess:
 				continue
-			logfile.write("filepath: "+f+"\n")
-			logfile.write("runnumber: "+str(runnumber)+"\n")
-			logfile.write("filesize: "+str(filesize)+'\n')
 			
 			#	if this guy is already present in the db
 			#	go to the next guy
 			if rdb.exists(runnumber):
 				continue
 			else:
-				logfile.write("process::runnumber %d doesn't exist... \n" % (
-					runnumber))
-				#	doesn't exist yet
 				runType = getRunType(wbmdb, runnumber, settings)
 				if runType==None:
-					logfile.write("process::runType is unknown.... Skipping...\n")
 					continue
-				logfile.write("runType: "+runType+"\n")
 	
 				#	get the list of last runs before you mark this run
 #				listLastRuns,listLastRunFiles = rdb.getLast(runType.upper())
+				harvestRunList = rdb.getLast(runType)
 				#	mark and process
 				rdb.mark(runnumber, runType.upper(), "processing")
-				try:
-#					print listLastRuns, listLastRunFiles
-					rt = run.process(f, runType.upper(), settings, logfile)	
-					if rt==0: # all is good
-						rdb.mark(runnumber, runType.upper(), "processed")
-						logfile.write("SUCCESS %d\n" % runnumber)
-					else:
-						rdb.mark(runnumber, runType.upper(), "failed")
-						logfile.write("FAILED %d\n" % runnumber)
-				except Exception as exc:
-					logfile.write("Exception Name %s Exception Message %s\n" %
-						(type(exc).__name__, str(exc.args)))
+				isGood = False
+				for i in range(5):
+					try:
+						#
+						#	Try to process for 5 times.
+						#	Transferring files might not be optimal and that 
+						#	influences  the processing...
+						#
+						rt = run.process(f, runType.upper(), settings, 
+							harvestRunList, logfile)
+						if rt==0: # all is good
+							rdb.mark(runnumber, runType.upper(), "processed")
+							isGood=True
+							break
+						else:
+							isGood=False
+							continue
+					except Exception as exc:
+						isGood=False
+						continue
+				if not isGood:
 					rdb.mark(runnumber, runType.upper(), "failed")
-					logfile.write("FAILED %d\n" % runnumber)
 	except NameError as exc:
 		logfile.write("NameErorr has occured. Exiting...\n")
 		logfile.write("Error Message: "+str(exc.args)+'\n')

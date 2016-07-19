@@ -1,5 +1,9 @@
 #!/bin/sh
 
+#
+#	Run with ./wrapupload.sh <LOGFILENAME>
+#
+
 LOG=$1
 source ~/.bashrc
 
