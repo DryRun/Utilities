@@ -7,6 +7,9 @@
 DEST=$1
 SRC=`dirname ${BASH_SOURCE[0]}`
 
+echo SRC: $SRC
+echo DEST: $DEST
+
 cp -r $SRC $DEST
 mkdir $DEST/LOGS
 source $DEST/Utilities/env.sh

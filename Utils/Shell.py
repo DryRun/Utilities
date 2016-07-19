@@ -6,8 +6,7 @@ Description:
 """
 
 import sys, os
-pathTohcaldqm = os.environ["HCALDQMSRC"]
-pathToUtilities = pathTohcaldqm+"/"+"Utilities"
+pathToUtilities = os.environ["HCALDQMUTILITIES"]
 sys.path.append(pathToUtilities)
 
 #
